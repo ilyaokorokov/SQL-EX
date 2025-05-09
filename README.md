@@ -372,12 +372,152 @@ FROM (
 <summary><b>Задание №29:</b> В предположении, что приход и расход денег на каждом пункте приема фиксируется не чаще одного раза в день [т.е. первичный ключ (пункт, дата)], написать запрос с выходными данными (пункт, дата, приход, расход). Использовать таблицы Income_o и Outcome_o.</summary>
   
   ```mysql
+SELECT income_o.point, income_o.date, inc, out
+FROM income_o
+LEFT JOIN outcome_o ON income_o.point = outcome_o.point
+AND income_o.date = outcome_o.date
 
+UNION
+
+SELECT outcome_o.point, outcome_o.date, inc, out
+FROM income_o 
+RIGHT JOIN outcome_o ON income_o.point = outcome_o.point
+AND income_o.date = outcome_o.date
 ```
 
 </details>
 <details>
-<summary><b>Задание №30:</b> .</summary>
+<summary><b>Задание №30:</b> В предположении, что приход и расход денег на каждом пункте приема фиксируется произвольное число раз (первичным ключом в таблицах является столбец code), требуется получить таблицу, в которой каждому пункту за каждую дату выполнения операций будет соответствовать одна строка. Вывод: point, date, суммарный расход пункта за день (out), суммарный приход пункта за день (inc). Отсутствующие значения считать неопределенными (NULL).</summary>
+  
+  ```mysql
+WITH Inc AS (
+    SELECT point, date, SUM(inc) AS suminc
+    FROM Income
+    GROUP BY point, date
+),
+Outc AS (
+    SELECT point, date, SUM(out) AS sumout
+    FROM Outcome
+    GROUP BY point, date
+)
+
+SELECT 
+    COALESCE(Inc.point, Outc.point) AS point,
+    COALESCE(Inc.date, Outc.date) AS date,
+    Outc.sumout,
+    Inc.suminc
+FROM Inc
+FULL OUTER JOIN Outc ON Inc.point = Outc.point AND Inc.date = Outc.date
+ORDER BY point, date
+```
+
+</details>
+<details>
+<summary><b>Задание №31:</b> Для классов кораблей, калибр орудий которых не менее 16 дюймов, укажите класс и страну.</summary>
+  
+  ```mysql
+SELECT class, country
+FROM Classes
+WHERE bore >= 16
+```
+
+</details>
+<details>
+<summary><b>Задание №32:</b> Одной из характеристик корабля является половина куба калибра его главных орудий (mw). С точностью до 2 десятичных знаков определите среднее значение mw для кораблей каждой страны, у которой есть корабли в базе данных.</summary>
+  
+  ```mysql
+WITH с AS (
+    SELECT country, classes.class, bore, name
+    FROM classes
+    LEFT JOIN ships ON classes.class = ships.class
+
+    UNION ALL
+
+    SELECT DISTINCT country, class, bore, ship AS name
+    FROM classes t1
+    LEFT JOIN outcomes t2 ON t1.class = t2.ship
+    WHERE ship = class AND ship NOT IN (SELECT name FROM ships)
+)
+
+SELECT 
+    country, 
+    CAST(AVG(POWER(bore, 3) / 2.0) AS numeric(6, 2)) AS weight
+FROM с
+WHERE name IS NOT NULL
+GROUP BY country
+```
+
+</details>
+<details>
+<summary><b>Задание №33:</b> Укажите корабли, потопленные в сражениях в Северной Атлантике (North Atlantic). Вывод: ship.</summary>
+  
+  ```mysql
+SELECT ship
+FROM Outcomes
+INNER JOIN Battles ON Battles.name = Outcomes.battle
+WHERE Outcomes.result = 'sunk' AND Battles.name = 'North Atlantic'
+```
+
+</details>
+<details>
+<summary><b>Задание №34:</b> По Вашингтонскому международному договору от начала 1922 г. запрещалось строить линейные корабли водоизмещением более 35 тыс.тонн. Укажите корабли, нарушившие этот договор (учитывать только корабли c известным годом спуска на воду). Вывести названия кораблей.</summary>
+  
+  ```mysql
+Select name
+FROM classes
+INNER JOIN Ships ON Ships.class = Classes.class
+WHERE launched >= 1922 AND displacement > 35000 AND type='bb'
+```
+
+</details>
+<details>
+<summary><b>Задание №35:</b> В таблице Product найти модели, которые состоят только из цифр или только из латинских букв (A-Z, без учета регистра). Вывод: номер модели, тип модели.</summary>
+  
+  ```mysql
+SELECT model, type
+FROM product 
+WHERE model NOT LIKE '%[^a-z]%' OR model NOT LIKE '%[^0-9]%'
+```
+
+</details>
+<details>
+<summary><b>Задание №36:</b> Перечислите названия головных кораблей, имеющихся в базе данных (учесть корабли в Outcomes).</summary>
+  
+  ```mysql
+SELECT name
+FROM ships
+WHERE class = name   
+
+UNION  
+
+SELECT ship
+FROM classes, outcomes
+WHERE classes.class = outcomes.ship
+```
+
+</details>
+<details>
+<summary><b>Задание №37:</b> Найдите классы, в которые входит только один корабль из базы данных (учесть также корабли в Outcomes).</summary>
+  
+  ```mysql
+SELECT class
+FROM (
+    SELECT name, class
+    FROM ships 
+
+    UNION
+
+    SELECT class AS name, class
+    FROM classes
+    JOIN outcomes ON classes.class = outcomes.ship
+) as t
+GROUP BY class
+HAVING COUNT(name) = 1
+```
+
+</details>
+<details>
+<summary><b>Задание №38:</b> .</summary>
   
   ```mysql
 
@@ -385,7 +525,7 @@ FROM (
 
 </details>
 <details>
-<summary><b>Задание №31:</b> .</summary>
+<summary><b>Задание №39:</b> .</summary>
   
   ```mysql
 
@@ -393,7 +533,7 @@ FROM (
 
 </details>
 <details>
-<summary><b>Задание №32:</b> .</summary>
+<summary><b>Задание №40:</b> .</summary>
   
   ```mysql
 
@@ -401,23 +541,7 @@ FROM (
 
 </details>
 <details>
-<summary><b>Задание №33:</b> .</summary>
-  
-  ```mysql
-
-```
-
-</details>
-<details>
-<summary><b>Задание №34:</b> .</summary>
-  
-  ```mysql
-
-```
-
-</details>
-<details>
-<summary><b>Задание №35:</b> .</summary>
+<summary><b>Задание №41:</b> .</summary>
   
   ```mysql
 
