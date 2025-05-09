@@ -254,12 +254,22 @@ GROUP BY speed
 <summary><b>Задание №23:</b> Найдите производителей, которые производили бы как ПК со скоростью не менее 750 МГц, так и ПК-блокноты со скоростью не менее 750 МГц. Вывести: Maker.</summary>
   
   ```mysql
+SELECT DISTINCT maker
+FROM product
+INNER JOIN laptop ON laptop.model = product.model
+WHERE laptop.speed >= 750
 
+INTERSECT
+
+SELECT DISTINCT maker
+FROM product
+INNER JOIN pc ON pc.model = product.model
+WHERE pc.speed >= 750
 ```
 
 </details>
 <details>
-<summary><b>Задание №24:</b> .</summary>
+<summary><b>Задание №24:</b> Перечислите номера моделей любых типов, имеющих самую высокую цену по всей имеющейся в базе данных продукции.</summary>
   
   ```mysql
 
@@ -268,6 +278,86 @@ GROUP BY speed
 </details>
 <details>
 <summary><b>Задание №25:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №26:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №27:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №28:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №29:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №30:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №31:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №32:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №33:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №34:</b> .</summary>
+  
+  ```mysql
+
+```
+
+</details>
+<details>
+<summary><b>Задание №35:</b> .</summary>
   
   ```mysql
 
