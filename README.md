@@ -272,44 +272,104 @@ WHERE pc.speed >= 750
 <summary><b>Задание №24:</b> Перечислите номера моделей любых типов, имеющих самую высокую цену по всей имеющейся в базе данных продукции.</summary>
   
   ```mysql
+WITH max_price AS (
+  SELECT MAX(price) AS price FROM (
+    SELECT price FROM pc
+    UNION ALL
+    SELECT price FROM laptop
+    UNION ALL
+    SELECT price FROM printer
+  ) AS all_prices
+)
 
+SELECT model 
+FROM pc 
+WHERE price = (SELECT price FROM max_price)
+
+UNION
+
+SELECT model 
+FROM laptop 
+WHERE price = (SELECT price FROM max_price)
+
+UNION
+
+SELECT model 
+FROM printer 
+WHERE price = (SELECT price FROM max_price)
 ```
 
 </details>
 <details>
-<summary><b>Задание №25:</b> .</summary>
+<summary><b>Задание №25:</b> Найдите производителей принтеров, которые производят ПК с наименьшим объемом RAM и с самым быстрым процессором среди всех ПК, имеющих наименьший объем RAM. Вывести: Maker.</summary>
   
   ```mysql
+SELECT DISTINCT product.maker
+FROM product
+INNER JOIN pc ON pc.model = product.model
+WHERE pc.ram = (SELECT MIN(ram) FROM pc) AND pc.speed = (SELECT MAX(speed) FROM pc WHERE ram = (SELECT MIN(ram) FROM pc))
 
+INTERSECT
+
+SELECT maker
+FROM product
+WHERE type = 'printer'
 ```
 
 </details>
 <details>
-<summary><b>Задание №26:</b> .</summary>
+<summary><b>Задание №26:</b> Найдите среднюю цену ПК и ПК-блокнотов, выпущенных производителем A (латинская буква). Вывести: одна общая средняя цена.</summary>
   
   ```mysql
+SELECT AVG(price)
+FROM (
+  SELECT pc.price
+  FROM product
+  INNER JOIN pc ON pc.model = product.model
+  WHERE product.maker = 'A'
 
+  UNION ALL
+
+  SELECT laptop.price
+  FROM product
+  INNER JOIN laptop ON laptop.model = product.model
+  WHERE product.maker = 'A'
+) as t
 ```
 
 </details>
 <details>
-<summary><b>Задание №27:</b> .</summary>
+<summary><b>Задание №27:</b> Найдите средний размер диска ПК каждого из тех производителей, которые выпускают и принтеры. Вывести: maker, средний размер HD.</summary>
   
   ```mysql
-
+SELECT product.maker, AVG(pc.hd)
+FROM product
+INNER JOIN pc ON pc.model = product.model
+WHERE product.maker IN (
+  SELECT maker
+  FROM product
+  WHERE type = 'printer'
+)
+GROUP BY product.maker
 ```
 
 </details>
 <details>
-<summary><b>Задание №28:</b> .</summary>
+<summary><b>Задание №28:</b> Используя таблицу Product, определить количество производителей, выпускающих по одной модели.</summary>
   
   ```mysql
-
+SELECT COUNT(*)
+FROM (
+  SELECT maker
+  FROM product
+  GROUP BY maker
+  HAVING COUNT(*) = 1
+) as t
 ```
 
 </details>
 <details>
-<summary><b>Задание №29:</b> .</summary>
+<summary><b>Задание №29:</b> В предположении, что приход и расход денег на каждом пункте приема фиксируется не чаще одного раза в день [т.е. первичный ключ (пункт, дата)], написать запрос с выходными данными (пункт, дата, приход, расход). Использовать таблицы Income_o и Outcome_o.</summary>
   
   ```mysql
 
