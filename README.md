@@ -517,7 +517,48 @@ HAVING COUNT(name) = 1
 
 </details>
 <details>
-<summary><b>Задание №38:</b> .</summary>
+<summary><b>Задание №38:</b> Найдите страны, имевшие когда-либо классы обычных боевых кораблей ('bb') и имевшие когда-либо классы крейсеров ('bc').</summary>
+  
+  ```mysql
+SELECT DISTINCT country
+FROM Classes
+WHERE type = 'bb'
+
+INTERSECT
+
+SELECT DISTINCT country
+FROM Classes
+WHERE type = 'bc'
+```
+
+</details>
+<details>
+<summary><b>Задание №39:</b> Найдите корабли, `сохранившиеся для будущих сражений`; т.е. выведенные из строя в одной битве (damaged), они участвовали в другой, произошедшей позже.</summary>
+  
+  ```mysql
+SELECT DISTINCT o1.ship
+FROM Outcomes o1
+JOIN Outcomes o2 ON o1.ship = o2.ship
+JOIN Battles b1 ON o1.battle = b1.name
+JOIN Battles b2 ON o2.battle = b2.name
+WHERE o1.result = 'damaged' AND b2.date > b1.date
+```
+
+</details>
+<details>
+<summary><b>Задание №40:</b> Найти производителей, которые выпускают более одной модели, при этом все выпускаемые производителем модели являются продуктами одного типа.
+Вывести: maker, type.</summary>
+  
+  ```mysql
+SELECT maker, type
+FROM Product
+GROUP BY maker, type
+HAVING COUNT(model) > 1 AND maker IN (SELECT maker FROM Product GROUP BY maker HAVING COUNT(DISTINCT type) = 1)
+```
+
+</details>
+<details>
+<summary><b>Задание №41:</b> Для каждого производителя, у которого присутствуют модели хотя бы в одной из таблиц PC, Laptop или Printer, определить максимальную цену на его продукцию. Вывод: имя производителя, если среди цен на продукцию данного производителя присутствует NULL, то выводить для этого производителя NULL, иначе максимальную цену.</summary>
   
   ```mysql
 
@@ -525,7 +566,77 @@ HAVING COUNT(name) = 1
 
 </details>
 <details>
-<summary><b>Задание №39:</b> .</summary>
+<summary><b>Задание №42:</b> Найдите названия кораблей, потопленных в сражениях, и название сражения, в котором они были потоплены.</summary>
+  
+  ```mysql
+SELECT ship, battle
+FROM outcomes
+WHERE result = 'sunk'
+```
+
+</details>
+<details>
+<summary><b>Задание №43:</b> Укажите сражения, которые произошли в годы, не совпадающие ни с одним из годов спуска кораблей на воду.</summary>
+  
+  ```mysql
+SELECT DISTINCT name
+FROM Battles
+WHERE YEAR(date) NOT IN (SELECT launched FROM Ships WHERE launched IS NOT NULL)
+```
+
+</details>
+<details>
+<summary><b>Задание №44:</b> Найдите названия всех кораблей в базе данных, начинающихся с буквы R.</summary>
+  
+  ```mysql
+SELECT name
+FROM Ships
+WHERE name LIKE 'R%'
+
+UNION
+
+SELECT ship
+FROM Outcomes
+WHERE ship LIKE 'R%'
+```
+
+</details>
+<details>
+<summary><b>Задание №45:</b> Найдите названия всех кораблей в базе данных, состоящие из трех и более слов (например, King George V). Считать, что слова в названиях разделяются единичными пробелами, и нет концевых пробелов.</summary>
+  
+  ```mysql
+SELECT name
+FROM Ships
+WHERE name LIKE '% % %'
+
+UNION
+
+SELECT ship
+FROM Outcomes
+WHERE ship LIKE '% % %'
+```
+
+</details>
+<details>
+<summary><b>Задание №46:</b> Для каждого корабля, участвовавшего в сражении при Гвадалканале (Guadalcanal), вывести название, водоизмещение и число орудий.</summary>
+  
+  ```mysql
+SELECT out.ship, displacement, numGuns
+FROM (SELECT name AS ship, displacement, numGuns
+FROM Ships s JOIN Classes c ON c.class = s.class
+
+UNION
+
+SELECT class AS ship, displacement, numGuns
+FROM Classes) AS ttt
+
+RIGHT JOIN Outcomes out ON out.ship = ttt.ship
+WHERE battle = 'Guadalcanal'
+```
+
+</details>
+<details>
+<summary><b>Задание №47:</b> Определить страны, которые потеряли в сражениях все свои корабли.</summary>
   
   ```mysql
 
@@ -533,15 +644,49 @@ HAVING COUNT(name) = 1
 
 </details>
 <details>
-<summary><b>Задание №40:</b> .</summary>
+<summary><b>Задание №48:</b> Найдите классы кораблей, в которых хотя бы один корабль был потоплен в сражении.</summary>
   
   ```mysql
-
+SELECT DISTINCT classes.class
+FROM Outcomes
+LEFT JOIN ships ON outcomes.ship = ships.name
+INNER JOIN classes ON (outcomes.ship = classes.class OR ships.class = classes.class)
+WHERE result = 'sunk'
 ```
 
 </details>
 <details>
-<summary><b>Задание №41:</b> .</summary>
+<summary><b>Задание №49:</b> Найдите названия кораблей с орудиями калибра 16 дюймов (учесть корабли из таблицы Outcomes).</summary>
+  
+  ```mysql
+SELECT name
+FROM Ships
+INNER JOIN Classes ON Classes.class = Ships.class
+WHERE bore = 16
+
+UNION
+
+SELECT ship
+FROM Outcomes 
+INNER JOIN classes ON Outcomes.ship = Classes.class
+WHERE bore = 16
+```
+
+</details>
+<details>
+<summary><b>Задание №50:</b> Найдите сражения, в которых участвовали корабли класса Kongo из таблицы Ships.</summary>
+  
+  ```mysql
+SELECT DISTINCT Battles.name
+FROM Battles
+INNER JOIN Outcomes ON Battles.name = Outcomes.battle
+INNER JOIN Ships ON Outcomes.ship = Ships.name
+WHERE Ships.class = 'Kongo'
+```
+
+</details>
+<details>
+<summary><b>Задание №51:</b> .</summary>
   
   ```mysql
 
